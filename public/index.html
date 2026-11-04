@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>টাস্ক অ্যাপ</title><link rel="stylesheet" href="style.css"></head><body>
+<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>টাস্ক অ্যাপ</title><link rel="stylesheet" href="style.css"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2563eb"><link rel="apple-touch-icon" href="icon-192.png"></head><body>
 <section id="auth" hidden><h2>লগইন / রেজিস্টার</h2>
 <label>ইউজারনেম</label><input id="u" autocapitalize="none"><label>পাসওয়ার্ড</label><input id="pw" type="password">
 <button id="li">লগইন</button> <button class="g" id="rg">রেজিস্টার</button><p class="err" id="ae"></p></section>
@@ -41,5 +41,6 @@ $("list").onclick=async e=>{const d=e.target.dataset;if(!d.s)return;
 $("cx").onclick=stop;
 $("req").onclick=async()=>{const r=await api("withdraw",{method:$("m").value,number:$("num").value,points:$("amt").value});
  $("we").style.color=r.ok?"var(--ok)":"";$("we").textContent=r.ok?"রিকোয়েস্ট জমা হয়েছে":r.error;if(r.ok){$("amt").value="";boot()}};
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js");
 boot();
 </script></body></html>
