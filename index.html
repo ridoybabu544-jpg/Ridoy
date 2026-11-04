@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>টাস্ক অ্যাপ</title><link rel="stylesheet" href="style.css"></head><body>
+<section id="auth" hidden><h2>লগইন / রেজিস্টার</h2>
+<label>ইউজারনেম</label><input id="u" autocapitalize="none"><label>পাসওয়ার্ড</label><input id="pw" type="password">
+<button id="li">লগইন</button> <button class="g" id="rg">রেজিস্টার</button><p class="err" id="ae"></p></section>
+<section id="app" hidden>
+<div class="hero"><small id="hi"></small><b id="pt">0</b></div>
+<div id="v-tasks"><h2>টাস্ক</h2><div id="list"></div></div>
+<div id="v-wd" hidden><h2>উইথড্র</h2><p class="mut">ন্যূনতম ১০০ পয়েন্ট।</p>
+<select id="m"><option>বিকাশ</option><option>নগদ</option><option>রকেট</option></select>
+<input id="num" inputmode="numeric" placeholder="01XXXXXXXXX"><input id="amt" inputmode="numeric" placeholder="পয়েন্ট">
+<button id="req" style="width:100%">রিকোয়েস্ট পাঠান</button><p class="err" id="we"></p>
+<h2>রিকোয়েস্ট তালিকা</h2><div id="wl"></div><button class="g" id="out" style="margin-top:12px">লগআউট</button></div>
+<nav><button class="on" data-v="tasks">টাস্ক</button><button data-v="wd">ওয়ালেট / উইথড্র</button></nav></section>
+<div class="ov" id="ov"><div class="notice">টাইম শেষ না হওয়া পর্যন্ত অপেক্ষা করবেন। কোনো লিঙ্ক/অ্যাড ক্লিক করবেন না।</div>
+<div class="ring" id="ring"><span id="sec">0</span></div><div class="page" id="pg"></div><button class="g" id="cx" style="margin-top:12px">বাতিল</button></div>
+<script>
+const $=i=>document.getElementById(i),bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function api(p,b,m){const r=await fetch("/api/"+p,{method:m||(b?"POST":"GET"),headers:{"content-type":"application/json",authorization:"Bearer "+(localStorage.getItem("t")||"")},body:b?JSON.stringify(b):undefined});
+ const d=await r.json().catch(()=>({}));if(r.status===401&&p!=="login"&&localStorage.getItem("t")){localStorage.removeItem("t");boot()}return{ok:r.ok,...d}}
+async function auth(p){const r=await api(p,{username:$("u").value,password:$("pw").value});if(!r.ok){$("ae").textContent=r.error||"সমস্যা হয়েছে";return}localStorage.setItem("t",r.token);boot()}
+$("li").onclick=()=>auth("login");$("rg").onclick=()=>auth("register");
+$("out").onclick=()=>{localStorage.removeItem("t");boot()};
+async function boot(){
+ const me=localStorage.getItem("t")?await api("me"):{ok:false};
+ $("auth").hidden=me.ok;$("app").hidden=!me.ok;if(!me.ok)return;
+ $("hi").textContent="স্বাগতম, "+me.username;$("pt").textContent=bn(me.points);
+ const t=await api("tasks");
+ $("list").innerHTML=(t.rows||[]).map(k=>`<div class="card"><div class="i"><h3>${esc(k.title)}</h3><p>${bn(k.seconds)} সেকেন্ড · ${bn(k.points)} পয়েন্ট</p></div>${k.done?'<span class="done">✔ শেষ</span>':`<button data-s="${k.id}" data-n="${esc(k.title)}" data-t="${k.seconds}">শুরু</button>`}</div>`).join("")||'<p class="mut">কোনো টাস্ক নেই</p>';
+ const w=await api("withdraws"),st={pending:"অপেক্ষমাণ",approved:"অনুমোদিত",rejected:"বাতিল"};
+ $("wl").innerHTML=(w.rows||[]).map(x=>`<div class="card"><div class="i"><h3>${bn(x.points)} পয়েন্ট · ${esc(x.method)}</h3><p>${esc(x.number)}</p></div><span class="mut">${st[x.status]}</span></div>`).join("")||'<p class="mut">এখনো কিছু নেই</p>';
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));$("v-tasks").hidden=b.dataset.v!=="tasks";$("v-wd").hidden=b.dataset.v!=="wd"});
+let tm=null,id=0,left=0,tot=0;
+function stop(){clearInterval(tm);$("ov").classList.remove("show")}
+function tick(){$("sec").textContent=bn(Math.max(left,0));$("ring").style.setProperty("--p",((tot-left)/tot*100)+"%")}
+$("list").onclick=async e=>{const d=e.target.dataset;if(!d.s)return;
+ const r=await api("tasks/start",{id:+d.s});if(!r.ok){alert(r.error);return}
+ id=+d.s;tot=left=+d.t;$("pg").textContent="“"+d.n+"” চলছে… অপেক্ষা করুন।";$("ov").classList.add("show");tick();
+ tm=setInterval(()=>{if(document.hidden)return;left--;tick();if(left<=0){stop();setTimeout(async()=>{const f=await api("tasks/finish",{id});if(!f.ok)alert(f.error);boot()},1600)}},1000)};
+$("cx").onclick=stop;
+$("req").onclick=async()=>{const r=await api("withdraw",{method:$("m").value,number:$("num").value,points:$("amt").value});
+ $("we").style.color=r.ok?"var(--ok)":"";$("we").textContent=r.ok?"রিকোয়েস্ট জমা হয়েছে":r.error;if(r.ok){$("amt").value="";boot()}};
+boot();
+</script></body></html>

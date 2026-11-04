@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>অ্যাডমিন</title><link rel="stylesheet" href="style.css"><meta name="robots" content="noindex"></head><body>
+<section id="lg" hidden><h2>অ্যাডমিন লগইন</h2><input id="pw" type="password" placeholder="অ্যাডমিন পাসওয়ার্ড"><button id="go">লগইন</button><p class="err" id="le"></p></section>
+<section id="ad" hidden>
+<div id="v-t"><h2>টাস্ক যোগ করুন</h2><input id="tn" placeholder="নাম"><input id="ts" inputmode="numeric" placeholder="সেকেন্ড"><input id="tp" inputmode="numeric" placeholder="পয়েন্ট">
+<button id="add" style="width:100%">যোগ করুন</button><p class="err" id="te"></p><h2>বর্তমান টাস্ক</h2><div id="tl"></div></div>
+<div id="v-w" hidden><h2>উইথড্র রিকোয়েস্ট</h2><div id="wl"></div></div>
+<div id="v-u" hidden><h2>ইউজার</h2><div id="ul"></div></div>
+<nav><button class="on" data-v="t">টাস্ক</button><button data-v="w">উইথড্র</button><button data-v="u">ইউজার</button></nav></section>
+<script>
+const $=i=>document.getElementById(i),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function api(p,b,m){const r=await fetch("/api/"+p,{method:m||(b?"POST":"GET"),headers:{"content-type":"application/json",authorization:"Bearer "+(localStorage.getItem("at")||"")},body:b?JSON.stringify(b):undefined});
+ const d=await r.json().catch(()=>({}));return{ok:r.ok,...d}}
+$("go").onclick=async()=>{const r=await api("admin/login",{password:$("pw").value});if(!r.ok){$("le").textContent=r.error;return}localStorage.setItem("at",r.token);boot()};
+async function boot(){
+ const ok=localStorage.getItem("at")&&(await api("admin/users")).ok;
+ $("lg").hidden=!!ok;$("ad").hidden=!ok;if(!ok)return;
+ const [t,w,u]=await Promise.all([api("tasks"),api("admin/withdraws"),api("admin/users")]);
+ $("tl").innerHTML=t.rows.map(k=>`<div class="card"><div class="i"><h3>${esc(k.title)}</h3><p>${k.seconds} সেকেন্ড · ${k.points} পয়েন্ট</p></div><button class="r" data-d="${k.id}">মুছুন</button></div>`).join("");
+ $("wl").innerHTML=w.rows.map(x=>`<div class="card"><div class="i"><h3>${esc(x.username)} · ${x.points} পয়েন্ট</h3><p>${esc(x.method)} ${esc(x.number)} · ${x.status}</p></div>${x.status==="pending"?`<button class="k" data-a="approve" data-w="${x.id}">✔</button><button class="r" data-a="reject" data-w="${x.id}">✖</button>`:""}</div>`).join("")||'<p class="mut">কিছু নেই</p>';
+ $("ul").innerHTML=u.rows.map(x=>`<div class="card"><div class="i"><h3>${esc(x.username)}</h3></div><span class="mut">${x.points} পয়েন্ট</span></div>`).join("")||'<p class="mut">কিছু নেই</p>';
+}
+$("add").onclick=async()=>{const r=await api("admin/task",{title:$("tn").value,seconds:$("ts").value,points:$("tp").value});$("te").textContent=r.ok?"":r.error;if(r.ok){$("tn").value=$("ts").value=$("tp").value="";boot()}};
+$("tl").onclick=async e=>{if(e.target.dataset.d){await api("admin/task/"+e.target.dataset.d,{},"DELETE");boot()}};
+$("wl").onclick=async e=>{const d=e.target.dataset;if(d.w){await api("admin/withdraw/"+d.w,{action:d.a});boot()}};
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));["t","w","u"].forEach(k=>$("v-"+k).hidden=k!==b.dataset.v)});
+boot();
+</script></body></html>

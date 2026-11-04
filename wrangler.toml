@@ -1,0 +1,8 @@
+name = "task-app"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "taskapp"
+database_id = "PASTE_YOUR_D1_ID_HERE"

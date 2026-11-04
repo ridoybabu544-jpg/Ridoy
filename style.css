@@ -1,0 +1,18 @@
+:root{--bg:#f4f6fb;--card:#fff;--tx:#18202f;--mut:#667085;--pri:#2563eb;--ok:#16a34a;--bad:#dc2626;--bd:#e3e8f0}
+@media (prefers-color-scheme:dark){:root{--bg:#0e131c;--card:#18202d;--tx:#eef2f8;--mut:#9aa6b8;--pri:#4b82f5;--bd:#273242}}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans Bengali",system-ui,sans-serif}
+body{max-width:520px;margin:0 auto;padding:14px 14px 84px;min-height:100vh}
+.hero{background:var(--pri);color:#fff;border-radius:16px;padding:18px;margin-bottom:14px}.hero b{display:block;font-size:34px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.card .i{flex:1}.card h3{margin:0 0 3px;font-size:16px}.card p{margin:0;font-size:13px;color:var(--mut)}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;background:var(--pri);color:#fff;cursor:pointer}
+button.g{background:transparent;color:var(--pri);border:1px solid var(--pri)}button.r{background:var(--bad)}button.k{background:var(--ok)}
+input,select{width:100%;font:inherit;padding:11px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);margin:6px 0 12px}
+label,.mut{font-size:13px;color:var(--mut)}h2{font-size:18px;margin:8px 0 10px}.done{color:var(--ok)}.err{color:var(--bad);min-height:20px}
+nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;background:var(--card);border-top:1px solid var(--bd)}
+nav button{flex:1;background:none;color:var(--mut);border-radius:0;padding:14px 4px}nav button.on{color:var(--pri);font-weight:700}
+.ov{position:fixed;inset:0;background:var(--bg);z-index:9;display:none;flex-direction:column;padding:16px}.ov.show{display:flex}
+.ring{width:150px;height:150px;border-radius:50%;margin:18px auto;display:grid;place-items:center;font-size:40px;font-weight:700;background:conic-gradient(var(--pri) var(--p,0%),var(--bd) 0)}
+.ring span{width:122px;height:122px;border-radius:50%;background:var(--bg);display:grid;place-items:center}
+.notice{background:#fff4d6;color:#7a5200;border-radius:10px;padding:10px;font-size:14px}
+.page{flex:1;border:1px dashed var(--bd);border-radius:12px;padding:16px;margin-top:12px;color:var(--mut)}
