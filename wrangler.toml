@@ -10,4 +10,4 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "taskapp"
-database_id = "PASTE_YOUR_D1_ID_HERE"
+database_id = "969f6fc5-2e28-416a-909e-a4b81c405051"
